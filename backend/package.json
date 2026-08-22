@@ -1,0 +1,23 @@
+{
+  "name": "mada-marketplace-backend",
+  "version": "1.0.0",
+  "description": "API backend pour marketplace avec paiement mobile money (Mvola, Orange Money, Airtel Money)",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.5",
+    "cors": "^2.8.5",
+    "express-validator": "^7.2.0",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.4.0"
+  }
+}

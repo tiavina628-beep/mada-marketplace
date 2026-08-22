@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Boutique — Baobab Bazar</title>
+<link rel="stylesheet" href="css/style.css" />
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#16332a" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Baobab Bazar" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <svg class="logo-mark" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="19" fill="var(--zap)" stroke="var(--ink-dark)" stroke-width="2"/>
+      <rect x="17.5" y="20" width="5" height="12" rx="2.5" fill="var(--ink-dark)"/>
+      <path d="M20 20 C20 20 12 17 10 10 M20 20 C20 20 28 17 30 10 M20 20 L20 8" stroke="var(--ink-dark)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <circle cx="10" cy="9" r="2" fill="var(--ink-dark)"/>
+      <circle cx="30" cy="9" r="2" fill="var(--ink-dark)"/>
+      <circle cx="20" cy="7" r="2" fill="var(--ink-dark)"/>
+    </svg>
+    Baobab <span>Bazar</span>
+  </div>
+  <div class="header-actions">
+    <span id="userGreeting" style="display:none;"></span>
+    <button class="ghost" id="ordersBtn" style="display:none;">Mes commandes</button>
+    <button class="ghost" id="loginBtn">Se connecter</button>
+    <button class="wish-btn-header" id="notifBtn" aria-label="Notifications" style="display:none;">
+      🔔<span class="icon-badge" id="notifCount" data-count="0"></span>
+    </button>
+    <button class="wish-btn-header" id="wishBtn" aria-label="Favoris">
+      ♡<span class="icon-badge" id="wishCount" data-count="0"></span>
+    </button>
+    <button class="cart-btn" id="cartBtn" aria-label="Panier">
+      🛍️<span class="icon-badge" id="cartCount" data-count="0"></span>
+    </button>
+    <button class="ghost" id="logoutBtn" style="display:none;">Déconnexion</button>
+    <button class="avatar-btn" id="profileBtn" aria-label="Mon profil" style="display:none;">
+      <img id="userAvatar" class="avatar-chip" alt="avatar" />
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">🇲🇬 Fait avec des vendeurs malgaches</div>
+    <h1>Des trouvailles locales, livrées chez toi, payées en mobile money.</h1>
+    <p>Parcours le catalogue librement. Un compte est demandé uniquement au moment de valider ta commande.</p>
+    <div class="trust-strip">
+      <span>✅ Chaque produit est vérifié par un administrateur avant mise en ligne</span>
+      <span>🔒 Chaque paiement est vérifié manuellement, référence par référence</span>
+      <span>🇲🇬 Vendeurs basés à Madagascar</span>
+    </div>
+  </section>
+
+  <div class="search-bar">
+    <span>🔍</span>
+    <input type="search" id="searchInput" placeholder="Rechercher un produit..." />
+  </div>
+
+  <div class="filters-bar">
+    <div class="category-chips" id="categoryChips"></div>
+    <div class="filters-row">
+      <select id="sortSelect">
+        <option value="newest">Plus récents</option>
+        <option value="price_asc">Prix croissant</option>
+        <option value="price_desc">Prix décroissant</option>
+        <option value="rating">Mieux notés</option>
+      </select>
+      <input type="number" id="minPriceInput" placeholder="Prix min" min="0" />
+      <input type="number" id="maxPriceInput" placeholder="Prix max" min="0" />
+      <button type="button" id="resetFiltersBtn" class="reset-filters-btn">↺ Réinitialiser</button>
+    </div>
+  </div>
+  <p class="search-count" id="searchCount" style="display:none;"></p>
+
+  <section id="productGrid" class="product-grid"></section>
+  <p id="emptyState" class="empty-state" style="display:none;">Aucun produit disponible pour le moment.</p>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-badges">
+    <span>🔒 Paiement vérifié manuellement</span>
+    <span>✅ Produits validés par l'administration</span>
+    <span>🇲🇬 Vendeurs vérifiés à Madagascar</span>
+  </div>
+  <div>Baobab Bazar — paiement mobile money (Mvola, Orange Money, Airtel Money).</div>
+  <a href="politique-confidentialite.html">Politique de confidentialité</a>
+  <span> · </span>
+  <button id="feedbackBtn" class="footer-link-btn">💬 Nous écrire</button>
+</footer>
+
+<!-- Modal Connexion / Inscription -->
+<div class="overlay" id="authOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="authOverlay">✕</button>
+    <h2>Ton compte</h2>
+    <div class="tabs">
+      <button id="tabLogin" class="active">Se connecter</button>
+      <button id="tabRegister">Créer un compte</button>
+    </div>
+
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" name="email" required />
+      <label>Mot de passe</label>
+      <input type="password" name="password" required />
+      <div class="form-error" id="loginError"></div>
+      <button class="primary-btn" type="submit">Se connecter</button>
+    </form>
+
+    <form id="registerForm" style="display:none;">
+      <label>Nom complet</label>
+      <input type="text" name="full_name" required />
+      <label>Email</label>
+      <input type="email" name="email" required />
+      <label>Téléphone</label>
+      <input type="tel" name="phone" placeholder="034xxxxxxx" required />
+      <label>Mot de passe (8 caractères min.)</label>
+      <input type="password" name="password" minlength="8" required />
+      <div class="form-error" id="registerError"></div>
+      <button class="primary-btn" type="submit">Créer mon compte</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Panier -->
+<div class="overlay" id="cartOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="cartOverlay">✕</button>
+    <h2>Ton panier</h2>
+    <div id="cartLines"></div>
+    <div class="cart-total"><span>Total</span><span id="cartTotal">0 Ar</span></div>
+    <button class="primary-btn" id="checkoutBtn">Commander</button>
+  </div>
+</div>
+
+<!-- Modal Notifications -->
+<div class="overlay" id="notifOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="notifOverlay">✕</button>
+    <h2>Notifications</h2>
+    <button id="clearNotifsBtn" style="background:none; border:2px solid var(--ink); border-radius:10px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; margin-bottom:12px;">Tout supprimer</button>
+    <div id="notifList"></div>
+  </div>
+</div>
+
+<!-- Modal Favoris -->
+<div class="overlay" id="wishOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="wishOverlay">✕</button>
+    <h2>Tes favoris</h2>
+    <div id="wishLines"></div>
+  </div>
+</div>
+
+<!-- Modal Commande : adresse + paiement mobile money -->
+<div class="overlay" id="checkoutOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="checkoutOverlay">✕</button>
+    <h2>Finaliser la commande</h2>
+    <form id="checkoutForm">
+      <label>Adresse de livraison</label>
+      <textarea name="shipping_address" rows="3" required></textarea>
+
+      <div class="payment-steps">
+        <p><strong>1.</strong> Effectue toi-même le virement de <span id="checkoutTotal"></span> vers le numéro affiché ci-dessous, ou clique "Composer" pour ouvrir directement le menu :</p>
+        <ul class="payment-numbers" id="checkoutPaymentNumbers"></ul>
+        <p><strong>2.</strong> Une fois le virement fait, indique ci-dessous l'opérateur utilisé et la référence reçue par SMS.</p>
+      </div>
+
+      <label>Opérateur utilisé</label>
+      <select name="provider" required>
+        <option value="mvola">Mvola</option>
+        <option value="orange_money">Orange Money</option>
+        <option value="airtel_money">Airtel Money</option>
+      </select>
+      <label>Ton numéro (celui utilisé pour le virement)</label>
+      <input type="tel" name="phone_number" placeholder="034xxxxxxx" required />
+      <label>Référence de la transaction (reçue par SMS)</label>
+      <input type="text" name="client_reference" placeholder="ex: MV240807.1234.A56789" required />
+      <div class="form-error" id="checkoutError"></div>
+      <button class="primary-btn" type="submit">Envoyer la commande</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Profil -->
+<div class="overlay" id="profileOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="profileOverlay">✕</button>
+    <h2>Mon profil</h2>
+    <div style="text-align:center;">
+      <img id="profileAvatarPreview" class="avatar-preview" alt="avatar" />
+      <div class="upload-row" style="justify-content:center;">
+        <label class="upload-btn" for="avatarFileInput">📷 Changer la photo</label>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" />
+      </div>
+      <p class="upload-hint">Photo compressée automatiquement avant envoi.</p>
+    </div>
+    <form id="profileForm">
+      <label>Nom complet</label>
+      <input type="text" name="full_name" required />
+      <label>Email</label>
+      <input type="email" name="email" required />
+      <label>Téléphone</label>
+      <input type="tel" name="phone" required />
+      <hr style="border:none; border-top:1px solid var(--line); margin:18px 0;" />
+      <label>Mot de passe actuel <span style="font-weight:400; color:var(--ink-soft);">(uniquement pour changer le mot de passe)</span></label>
+      <input type="password" name="current_password" />
+      <label>Nouveau mot de passe <span style="font-weight:400; color:var(--ink-soft);">(8 caractères min., laisser vide pour ne pas changer)</span></label>
+      <input type="password" name="new_password" minlength="8" />
+      <div class="form-error" id="profileError"></div>
+      <div class="form-error" id="profileSuccess" style="color:#0F8A5F;"></div>
+      <button class="primary-btn" type="submit">Enregistrer les modifications</button>
+    </form>
+    <button id="deleteAccountBtn" style="width:100%; margin-top:12px; padding:11px; border-radius:14px; border:2px solid var(--ink); background:#fff; color:var(--pop); font-weight:700; cursor:pointer;">Supprimer mon compte</button>
+  </div>
+</div>
+
+<!-- Modal Historique des commandes -->
+<div class="overlay" id="ordersOverlay">
+  <div class="modal modal-wrap" style="max-width:600px;">
+    <button class="close-x" data-close="ordersOverlay">✕</button>
+    <h2>Mes commandes</h2>
+    <div id="ordersList"></div>
+  </div>
+</div>
+
+<!-- Modal Renvoi de référence après rejet -->
+<div class="overlay" id="resubmitOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="resubmitOverlay">✕</button>
+    <h2>Renvoyer un paiement</h2>
+    <p style="color:var(--ink-soft); font-size:0.88rem; margin-top:-8px;">Vérifie le motif du rejet ci-dessous, effectue le virement correct si besoin, puis indique la nouvelle référence.</p>
+    <form id="resubmitForm">
+      <input type="hidden" name="order_id" />
+      <label>Opérateur utilisé</label>
+      <select name="provider" required>
+        <option value="mvola">Mvola</option>
+        <option value="orange_money">Orange Money</option>
+        <option value="airtel_money">Airtel Money</option>
+      </select>
+      <label>Ton numéro (celui utilisé pour le virement)</label>
+      <input type="tel" name="phone_number" placeholder="034xxxxxxx" required />
+      <label>Nouvelle référence de la transaction</label>
+      <input type="text" name="client_reference" placeholder="ex: MV240807.1234.A56789" required />
+      <div class="form-error" id="resubmitError"></div>
+      <button class="primary-btn" type="submit">Envoyer la nouvelle référence</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Avis produit -->
+<div class="overlay" id="reviewOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="reviewOverlay">✕</button>
+    <h2>Laisser un avis</h2>
+    <p id="reviewProductName" style="font-weight:700; margin-top:-8px;"></p>
+    <div class="star-picker">
+      <span class="star-input">☆</span><span class="star-input">☆</span><span class="star-input">☆</span><span class="star-input">☆</span><span class="star-input">☆</span>
+    </div>
+    <form id="reviewForm">
+      <label>Commentaire (optionnel)</label>
+      <textarea id="reviewComment" rows="3" placeholder="Qu'as-tu pensé de ce produit ?"></textarea>
+      <div class="form-error" id="reviewError"></div>
+      <button class="primary-btn" type="submit">Envoyer mon avis</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Feedback -->
+<div class="overlay" id="feedbackOverlay">
+  <div class="modal modal-wrap">
+    <button class="close-x" data-close="feedbackOverlay">✕</button>
+    <h2>Nous écrire</h2>
+    <p style="color:var(--ink-soft); font-size:0.88rem; margin-top:-8px;">Une remarque, un problème, une suggestion ? On te lit.</p>
+    <form id="feedbackForm">
+      <label>Ton message</label>
+      <textarea id="feedbackMessage" rows="4" required></textarea>
+      <div class="form-error" id="feedbackError"></div>
+      <div class="form-error" id="feedbackSuccess" style="color:#0F8A5F;"></div>
+      <button class="primary-btn" type="submit">Envoyer</button>
+    </form>
+  </div>
+</div>
+
+<!-- Lightbox image agrandie -->
+<!-- Description plein écran (comme la visionneuse photo) -->
+<div class="lightbox-overlay" id="descOverlay">
+  <button class="lightbox-close" id="descClose">✕</button>
+  <div class="desc-viewer">
+    <h2 id="descViewerTitle"></h2>
+    <p id="descViewerText"></p>
+  </div>
+</div>
+
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Photo précédente">‹</button>
+  <div class="lightbox-content">
+    <img id="lightboxImg" src="" alt="Image agrandie" />
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+  <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Photo suivante">›</button>
+</div>
+
+<!-- Bandeau d'installation PWA -->
+<div class="install-banner" id="installBanner">
+  <span id="installText">📲 Installe Baobab Bazar sur ton téléphone pour un accès plus rapide.</span>
+  <div class="install-actions">
+    <button id="installBtn">Installer</button>
+    <button id="installDismiss" aria-label="Fermer">✕</button>
+  </div>
+</div>
+
+<script src="js/image-utils.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
